@@ -16,6 +16,8 @@
 (define (removeItem item lst)
   (filter (lambda (x) (not (equal? x item))) lst))
 
+  
+
 ;similar to displayShopList, but without newline
 (define (displayList list)
   (for-each (lambda (arg)
@@ -59,6 +61,8 @@
       [(equal? choice "no") playerItems]
       [(member choice aisle) 
        (let ([updatedAisle (removeItem choice aisle)])
+         ;(let ([updatedItems (addItem choice playerItems)])
+           ;(playAisle updatedAisle updatedItems)))]
          (addItem choice playerItems))]
       [else
        (displayln "Invalid choice.")
@@ -69,22 +73,33 @@
 ;player's hand
 (define playerItems '())
 
+;when help is typed
+(define (helpMenu items)
+  (printf "You are still in the store, with")
+  (displayList items)
+  (displayln " still in your possession. You can travel to any aisle now.")
+  (nextAisle (display&Read "Where would you like to go? Enter (1-10 or exit):\n") items))
+  
+  
 
 ;Get next aisle to go to
 (define (nextAisle aisle playerItems)
   (cond
-        [(string-ci=? aisle "1") (playAisle aisle1  playerItems)]
-        [(string-ci=? aisle "2") (playAisle aisle2  playerItems)]
-        [(string-ci=? aisle "3") (playAisle aisle3  playerItems)]
-        [(string-ci=? aisle "4") (playAisle aisle4  playerItems)]
-        [(string-ci=? aisle "5") (playAisle aisle5  playerItems)]
-        [(string-ci=? aisle "6") (playAisle aisle6  playerItems)]
-        [(string-ci=? aisle "7") (playAisle aisle7  playerItems)]
-        [(string-ci=? aisle "8") (playAisle aisle8  playerItems)]
-        [(string-ci=? aisle "9") (playAisle aisle9  playerItems)]
-        [(string-ci=? aisle "10") (playAisle aisle10 playerItems)]
-        [(string-ci=? aisle "exit") (exitGame shopList playerItems)]
-        [else (displayln "Invalid aisle, try again (1-10): ") (nextAisle (display&Read ""))]))
+    [(string-ci=? aisle "1") (playAisle aisle1 playerItems)]
+    [(string-ci=? aisle "2") (playAisle aisle2 playerItems)]
+    [(string-ci=? aisle "3") (playAisle aisle3 playerItems)]
+    [(string-ci=? aisle "4") (playAisle aisle4 playerItems)]
+    [(string-ci=? aisle "5") (playAisle aisle5 playerItems)]
+    [(string-ci=? aisle "6") (playAisle aisle6 playerItems)]
+    [(string-ci=? aisle "7") (playAisle aisle7 playerItems)]
+    [(string-ci=? aisle "8") (playAisle aisle8 playerItems)]
+    [(string-ci=? aisle "9") (playAisle aisle9 playerItems)]
+    [(string-ci=? aisle "10") (playAisle aisle10 playerItems)]
+    [(string-ci=? aisle "drop")
+     (let ([items (removeItem (display&Read "Enter item to drop: ") playerItems)])
+       (nextAisle (display&Read "\nEnter aisle to go to now (1-10) or exit: ") items))]
+    [(string-ci=? aisle "help") (helpMenu playerItems)]
+    [else (displayln "Invalid aisle, try again (1-10): ") (nextAisle (display&Read "") playerItems)]))
 
 ;Function to exit the store
 ;asked chatgpt what to use for if statement here, and it recommended "begin" statements
@@ -97,7 +112,7 @@
       (begin
         (printf "You hand her the bag of groceries and she opens them to find")
         (displayList items)
-        (displayln ".\nYou failed to bring home the 4 items your mom requested of you.")
+        (displayln ".\nYou failed to bring home just the 4 items your mom requested of you.")
         (displayln "She swiftly undoes her belt and whips you violently for a minute straight.")
         (displayln "Thanks for playing, and better luck next time pal!"))))
        
@@ -114,26 +129,22 @@
   (displayln "you lost on where anything is located, especially after the shelves have been reorganized.")
   (nextAisle (display&Read "Where do you begin your search for the groceries? Aisle... (Enter 1-10).\n") playerItems))
 
-;Loop game till user exits
-;(define playGame (shopList playerItems allAisles) 
- ; (let ([newPlayerItems (playAisle (printOpening shopList) shopList playerItems)])
- ;   (let loop ([shopList playerItems allAisles])
-  ;    [(
+;Play and Loop game till user exits
 
 (define (playGame shopList playerItems)
-  (let loop ([items playerItems])
-    (let ([nextAisleInput (display&Read "From your current aisle, Where do you go next? (Enter the next aisle number or 'exit' to finish)\n")])
-      (cond
-        [(string-ci=? nextAisleInput "exit") 
-         (exitGame shopList playerItems)]
-        [else
-         (loop (nextAisle nextAisleInput playerItems))]))))
+  (displayln "... it has been added to your cart.\nHere is the list again:\n\n\t\tList")
+  (displayShopList shopList)
+  (printf "\nYou currently have:")
+  (displayList playerItems)
+  (let ([nextAisleInput (display&Read "\nFrom your current aisle, Where do you go next? (Enter the next aisle num, 'drop' to drop an item, 'help' for help, or 'exit' to finish)\n")])
+    (cond
+      [(string-ci=? nextAisleInput "exit") 
+       (exitGame shopList playerItems)]
+      [else
+       (let ([nextAisleItems (nextAisle nextAisleInput playerItems)])
+         (playGame shopList nextAisleItems))])))
 
 
 
-
+;call function to play game
 (playGame shopList (printOpening shopList))
-
-
-
-  
